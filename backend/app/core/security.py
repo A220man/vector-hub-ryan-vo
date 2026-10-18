@@ -50,7 +50,7 @@ class OIDCClient:
             self._jwks_fetched_at = time.time()
             return self._jwks_cache
 
-    async def validate_token(self, token: str, expected_nonce: Optional[str] = None, audience: Optional[str] = None) -> TokenData:
+    async def validate_token(self, token: str, expected_nonce: Optional[str] = None, audience: Optional[str] = None, access_token: Optional[str] = None) -> TokenData:
         """Validate access token or ID token."""
         try:
             jwks = await self.get_jwks()
@@ -59,6 +59,7 @@ class OIDCClient:
                 jwks,
                 algorithms=["RS256"],
                 audience=audience or settings.oidc_audience,
+                access_token=access_token,
                 issuer=settings.oidc_external_issuer or settings.oidc_issuer,
                 options={"verify_aud": True, "verify_iss": True, "require_exp": True, "require_sub": True},
             )

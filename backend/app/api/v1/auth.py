@@ -85,7 +85,8 @@ async def callback(code: str, state: str, request: Request):
     if not tokens.get("access_token") or not tokens.get("id_token"):
         raise HTTPException(status_code=400, detail="Required tokens missing")
     identity = await oidc_client.validate_token(tokens["id_token"],
-        expected_nonce=transaction["nonce"], audience=settings.oidc_client_id)
+        expected_nonce=transaction["nonce"], audience=settings.oidc_client_id,
+        access_token=tokens["access_token"])
     token_data = await oidc_client.validate_token(tokens["access_token"])
     if not identity.sub or identity.sub != token_data.sub:
         raise HTTPException(status_code=401, detail="Token subject mismatch")

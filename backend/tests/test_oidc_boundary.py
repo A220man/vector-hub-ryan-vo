@@ -33,7 +33,7 @@ def flow(monkeypatch):
         if state.get('expired_access'):base['exp']=now-60
         if state.get('missing_exp'):base.pop('exp')
         tokens={'access_token':jwt.encode({**base,'aud':settings.oidc_audience},private,algorithm='RS256')}
-        if not state['missing_id']:tokens['id_token']=jwt.encode(identity,private,algorithm='RS256')
+        if not state['missing_id']:tokens['id_token']=jwt.encode(identity,private,algorithm='RS256',access_token='wrong-access-token' if state.get('bad_at_hash') else tokens['access_token'])
         return tokens
     monkeypatch.setattr(sec.oidc_client,'exchange_code',exchange)
     app=FastAPI();app.include_router(router,prefix='/api/v1')
@@ -66,7 +66,7 @@ def test_state_cannot_be_used_by_another_browser(flow):
     assert state['exchanges']==0
     assert client.get('/api/v1/auth/callback',params={'code':'valid','state':token},follow_redirects=False).status_code==303
 
-@pytest.mark.parametrize('flag,expected',[('bad_nonce',401),('missing_id',400),('subject_mismatch',401),('wrong_id_audience',401),('expired_access',401),('missing_exp',401)])
+@pytest.mark.parametrize('flag,expected',[('bad_at_hash',401),('bad_nonce',401),('missing_id',400),('subject_mismatch',401),('wrong_id_audience',401),('expired_access',401),('missing_exp',401)])
 def test_invalid_identity_rejected(flow,flag,expected):
     client,state,begin,_=flow;token=begin();state[flag]=True
     r=client.get('/api/v1/auth/callback',params={'code':'valid','state':token},follow_redirects=False)
