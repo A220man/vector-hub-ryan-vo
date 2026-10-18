@@ -1,0 +1,17 @@
+# Backend
+backend/__pycache__/
+backend/*.pyc
+backend/.venv/
+backend/.env
+backend/*.db
+backend/*.sqlite
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Docker
+*.tar
+*.tar.gz

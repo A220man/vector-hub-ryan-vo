@@ -1,0 +1,73 @@
+# Product development plan
+
+Each round completes one feature or repair. Future items are planned, not implemented claims.
+
+## Current round
+
+project-foundation
+
+## Roadmap
+
+### project-foundation — Project Foundation - FastAPI/React Skeleton with Worktree Management
+
+Status: done
+
+Acceptance:
+- FastAPI backend with SQLite, SQLAlchemy models for Project, Worktree, AgentRun
+- REST API for CRUD operations on projects and worktrees
+- Project clone/prepare endpoint to make projects ready for worktree operations
+- React + TypeScript + Vite frontend with typed API client
+- Dashboard showing projects, worktrees, and agent runs
+- Create project workflow with git repository URL (creates pending, then clones)
+- Create worktree workflow from ready project
+- Start/stop/complete agent run workflow on worktree with UI controls
+- pytest backend tests (49 meaningful tests)
+- vitest frontend tests (17 tests)
+- Dockerfiles and compose.yaml with Keycloak
+- OIDC authentication with PKCE and demo mode
+
+Implementation: `backend/app/main.py`, `backend/app/config.py`, `backend/app/core/db.py`, `backend/app/core/security.py`, `backend/app/services/git_service.py`, `backend/app/models/project.py`, `backend/app/models/worktree.py`, `backend/app/models/agent_run.py`, `backend/app/schemas/project.py`, `backend/app/schemas/worktree.py`, `backend/app/schemas/agent_run.py`, `backend/app/api/v1/projects.py`, `backend/app/api/v1/worktrees.py`, `backend/app/api/v1/agents.py`, `backend/app/api/v1/auth.py`, `frontend/src/App.tsx`, `frontend/src/api/client.ts`, `frontend/src/context/AuthContext.tsx`, `frontend/src/components/Layout.tsx`, `frontend/src/components/StatusBadge.tsx`, `frontend/src/pages/Dashboard.tsx`, `frontend/src/pages/ProjectsPage.tsx`, `frontend/src/pages/CreateProjectPage.tsx`, `frontend/src/pages/ProjectDetailPage.tsx`, `frontend/src/pages/WorktreesPage.tsx`, `frontend/src/pages/CreateWorktreePage.tsx`, `frontend/src/pages/WorktreeDetailPage.tsx`, `frontend/src/pages/AgentRunsPage.tsx`, `frontend/src/pages/CreateAgentRunPage.tsx`, `frontend/src/pages/AgentRunDetailPage.tsx`, `frontend/src/types.ts`
+
+Tests: `backend/tests/test_projects.py`, `backend/tests/test_auth.py`, `backend/tests/test_worktrees_agents.py`, `backend/tests/test_oidc_boundary.py`, `backend/tests/test_public_issuer.py`, `frontend/src/App.test.tsx`, `frontend/src/api/client.test.ts`, `frontend/src/api/client-boundary.test.ts`, `frontend/src/context/login-boundary.test.tsx`, `frontend/src/project-navigation.test.tsx`
+
+### worktree-git-operations — Git Worktree Operations - Real git worktree create/list/remove
+
+Status: planned
+
+Acceptance:
+- Backend service executes git worktree add/list/remove
+- Worktree creation from branch/ref with background task
+- Worktree status tracking (creating, ready, error)
+- Shared directories configuration (node_modules, .cache)
+- Frontend worktree creation wizard with start-from picker
+
+### agent-orchestration — Agent Orchestration - Run coding agents in worktrees
+
+Status: planned
+
+Acceptance:
+- Agent configuration (Claude Code, Codex, OpenCode, custom)
+- Start agent process in worktree with PTY
+- Stream agent output via WebSocket to frontend
+- Send input to agent terminal
+- Agent run history with logs
+
+### usage-tracking — Usage Tracking - Monitor agent API usage and costs
+
+Status: planned
+
+Acceptance:
+- Parse agent usage from local state/logs
+- Display usage per provider with reset windows
+- Cost estimation with local price table
+- Multi-account switching
+
+### mobile-companion-api — Mobile Companion API - Notifications and remote control
+
+Status: planned
+
+Acceptance:
+- WebSocket notifications for agent completion
+- Mobile-friendly REST endpoints
+- Push notification registration (FCM/APNs placeholder)
+
