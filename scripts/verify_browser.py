@@ -73,24 +73,27 @@ with sync_playwright() as driver:
         worktree = worktree_response.value.json()
         assert worktree['status'] == 'ready', 'Real git worktree creation failed'
         expect(page.get_by_role('link', name=worktree['name'], exact=True)).to_be_visible()
-        page.goto(BASE + '/agents')
-        page.get_by_role('link', name='New Agent Run', exact=True).click()
-        page.locator('form select').nth(0).select_option(worktree['id'])
-        page.locator('form select').nth(1).select_option('custom')
-        page.locator('form textarea').fill('Browser acceptance lifecycle record')
-        with page.expect_response(lambda response: response.url.split('?')[0] == API + '/agent-runs' and response.request.method == 'POST') as run_response:
-            page.get_by_role('button', name='Create', exact=True).click()
-        assert run_response.value.status == 201
-        run = run_response.value.json()
-        expect(page.get_by_role('heading', name='custom', exact=True)).to_be_visible()
-        # The selected foundation feature records lifecycle; launching a real agent is a later feature.
-        for action, expected in [('start', 'running'), ('stop', 'stopped')]:
-            with page.expect_response(lambda response: response.url == API + '/agent-runs/' + run['id'] + '/' + action and response.request.method == 'POST') as changed:
-                page.get_by_role('button', name=action.title(), exact=True).click()
-            assert changed.value.status == 200
-            assert changed.value.json()['status'] == expected
-            expect(page.get_by_text(expected, exact=True)).to_be_visible()
-        RECORD.write_text(json.dumps({'id': project['id'], 'name': project['name'], 'worktree_id': worktree['id'], 'run_id': run['id']}))
+        runs = {}
+        for terminal_action, terminal_status in [('stop', 'stopped'), ('complete', 'completed')]:
+            page.goto(BASE + '/agents')
+            page.get_by_role('link', name='New Agent Run', exact=True).click()
+            page.locator('form select').nth(0).select_option(worktree['id'])
+            page.locator('form select').nth(1).select_option('custom')
+            page.locator('form textarea').fill('Browser acceptance lifecycle record')
+            with page.expect_response(lambda response: response.url.split('?')[0] == API + '/agent-runs' and response.request.method == 'POST') as run_response:
+                page.get_by_role('button', name='Create', exact=True).click()
+            assert run_response.value.status == 201
+            run = run_response.value.json()
+            expect(page.get_by_role('heading', name='custom', exact=True)).to_be_visible()
+            # The selected foundation feature records lifecycle; launching a real agent is a later feature.
+            for action, expected in [('start', 'running'), (terminal_action, terminal_status)]:
+                with page.expect_response(lambda response: response.url == API + '/agent-runs/' + run['id'] + '/' + action and response.request.method == 'POST') as changed:
+                    page.get_by_role('button', name=action.title(), exact=True).click()
+                assert changed.value.status == 200
+                assert changed.value.json()['status'] == expected
+                expect(page.get_by_text(expected, exact=True)).to_be_visible()
+            runs[terminal_status] = run['id']
+        RECORD.write_text(json.dumps({'id': project['id'], 'name': project['name'], 'worktree_id': worktree['id'], 'runs': runs}))
     else:
         project = json.loads(RECORD.read_text())
         result = context.request.get(API + '/projects/' + project['id'])
@@ -101,11 +104,12 @@ with sync_playwright() as driver:
         assert result.json()['status'] == 'ready'
         worktree = context.request.get(API + '/worktrees/' + project['worktree_id'])
         assert worktree.status == 200 and worktree.json()['status'] == 'ready'
-        run = context.request.get(API + '/agent-runs/' + project['run_id'])
-        assert run.status == 200 and run.json()['status'] == 'stopped'
-        page.goto(BASE + '/agents/' + project['run_id'])
-        expect(page.get_by_role('heading', name='custom', exact=True)).to_be_visible()
-        expect(page.get_by_text('stopped', exact=True)).to_be_visible()
+        for expected, run_id in project['runs'].items():
+            run = context.request.get(API + '/agent-runs/' + run_id)
+            assert run.status == 200 and run.json()['status'] == expected
+            page.goto(BASE + '/agents/' + run_id)
+            expect(page.get_by_role('heading', name='custom', exact=True)).to_be_visible()
+            expect(page.get_by_text(expected, exact=True)).to_be_visible()
     print(json.dumps({'phase': mode, 'oidc_browser_login': 'passed', 'anonymous_write': 'rejected',
                       'invalid_csrf_write': 'rejected', 'project': project['id'], 'core_workflow': 'passed'}))
     context.close()

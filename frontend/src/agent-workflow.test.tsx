@@ -11,7 +11,8 @@ vi.mock('react-router-dom', async () => {
  const real = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
  return { ...real, BrowserRouter: ({children}: {children: React.ReactNode}) => <real.MemoryRouter initialEntries={['/agents']}>{children}</real.MemoryRouter> }
 })
-it('creates a run, reaches its details, starts and stops it using visible controls', async () => {
+it.each([['stop', 'Stop', 'stopped'], ['complete', 'Complete', 'completed']] as const)('creates and starts a run, then uses %s through visible controls', async (action, label, finalStatus) => {
+ vi.clearAllMocks()
  const run = { id: 'run-qa', worktree_id: 'worktree-qa', agent_name: 'claude-code', prompt: 'QA task', status: 'pending', created_at: new Date().toISOString(), updated_at: new Date().toISOString(), started_at: null, finished_at: null }
  vi.mocked(api.auth.me).mockResolvedValue({ sub: 'test', name: 'Test', email: 'test@example.com', roles: ['admin'] })
  vi.mocked(api.agents.list).mockResolvedValue([])
@@ -19,7 +20,7 @@ it('creates a run, reaches its details, starts and stops it using visible contro
  vi.mocked(api.agents.create).mockResolvedValue(run as never)
  vi.mocked(api.agents.get).mockImplementation(async () => ({...run}) as never)
  vi.mocked(api.agents.start).mockImplementation(async () => { run.status = 'running'; return {...run} as never })
- vi.mocked(api.agents.stop).mockImplementation(async () => { run.status = 'stopped'; return {...run} as never })
+ vi.mocked(api.agents[action]).mockImplementation(async () => { run.status = finalStatus; return {...run} as never })
  render(<App />)
  fireEvent.click(await screen.findByRole('link', {name: 'New Agent Run'}))
  await screen.findByRole('option', {name: /QA worktree/})
@@ -30,8 +31,8 @@ it('creates a run, reaches its details, starts and stops it using visible contro
  fireEvent.click(screen.getByRole('button', {name: 'Start'}))
  await waitFor(() => expect(api.agents.start).toHaveBeenCalledWith('run-qa'))
  expect(await screen.findByText('running', {exact: true})).toBeInTheDocument()
- fireEvent.click(screen.getByRole('button', {name: 'Stop'}))
- await waitFor(() => expect(api.agents.stop).toHaveBeenCalledWith('run-qa'))
- expect(await screen.findByText('stopped', {exact: true})).toBeInTheDocument()
+ fireEvent.click(screen.getByRole('button', {name: label}))
+ await waitFor(() => expect(api.agents[action]).toHaveBeenCalledWith('run-qa'))
+ expect(await screen.findByText(finalStatus, {exact: true})).toBeInTheDocument()
  expect(screen.getByRole('button', {name: 'Start'})).toBeDisabled()
 })

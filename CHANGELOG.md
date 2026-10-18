@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3] - 2026-10-18
+
+### Fixed
+- **Frontend Docker healthcheck** — Fixed nginx IPv4 binding (`listen 0.0.0.0:80`) and added dedicated `/frontend-health` endpoint returning 200 'ok' for reliable health checks without backend dependency. Changed healthcheck from `wget --spider` (HEAD request) to `wget -O /dev/null` (GET request) for compatibility with nginx `try_files` directive.
+- **Non-root nginx temp paths** — Configured explicit temp paths (`client_body_temp_path`, `proxy_temp_path`, etc.) and pid file in `/tmp` with proper ownership for appuser (UID 1001), resolving permission issues when nginx runs as non-root in the container.
+- **Frontend startup order** — Added `depends_on: backend: condition: service_healthy` to ensure frontend starts only after backend is healthy, improving Compose stack reliability.
+
+### Tests
+- Backend: 52 passed (unchanged)
+- Frontend: 21 passed (unchanged)
+- Frontend build: ✓ (tsc + vite build)
+
 ## [1.0.2] - 2026-10-18
 
 ### Fixed

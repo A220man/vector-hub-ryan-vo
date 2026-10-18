@@ -119,7 +119,15 @@ jobs:
         run: python scripts/verify_browser.py verify
       - name: Report service state
         if: always()
-        run: docker compose ps --all
+        run: |
+          docker compose ps --all
+          docker compose logs --no-color --tail=100
+          for service in frontend backend keycloak; do
+            container_id=$(docker compose ps --all --quiet "$service")
+            if [ -n "$container_id" ]; then
+              docker inspect --format '{{json .State.Health}}' "$container_id"
+            fi
+          done
       - name: Shutdown isolated stack
         if: always()
         run: docker compose down -v
