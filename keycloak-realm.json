@@ -1,0 +1,176 @@
+{
+  "realm": "vectorhub",
+  "enabled": true,
+  "displayName": "Vector Hub",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "clients": [
+    {
+      "clientId": "vector-hub",
+      "name": "Vector Hub Frontend",
+      "description": "Vector Hub SPA client",
+      "rootUrl": "http://localhost:5173",
+      "adminUrl": "http://localhost:5173",
+      "baseUrl": "/",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "changeme",
+      "redirectUris": [
+        "http://localhost:5173/auth/callback"
+      ],
+      "webOrigins": [
+        "http://localhost:5173"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:5173",
+        "pkce.code.challenge.method": "S256",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "backchannel.logout.session.required": "true",
+        "client.secret.creation.time": "1729200000"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "protocolMappers": [
+        {
+          "name": "email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "email",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "email",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "username",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "preferred_username",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "audience-vector-hub-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "vector-hub-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "basic",
+        "web-origins",
+        "role_list",
+        "profile",
+        "roles",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ],
+      "authorizationServicesEnabled": false
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "viewer",
+        "description": "Can view projects and worktrees",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "vectorhub"
+      },
+      {
+        "name": "operator",
+        "description": "Can create and manage projects, worktrees, and agent runs",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "vectorhub"
+      },
+      {
+        "name": "admin",
+        "description": "Full administrative access",
+        "composite": true,
+        "composites": {
+          "realm": [
+            "viewer",
+            "operator"
+          ]
+        },
+        "clientRole": false,
+        "containerId": "vectorhub"
+      }
+    ],
+    "client": {}
+  },
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "email": "admin@vectorhub.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin"
+      ],
+      "requiredActions": []
+    }
+  ]
+}

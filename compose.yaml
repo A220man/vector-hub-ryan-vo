@@ -1,0 +1,113 @@
+services:
+  # PostgreSQL for Keycloak
+  postgres:
+    image: postgres:16-alpine
+    container_name: vectorhub-postgres
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vectorhub-network
+
+  # Keycloak for OIDC authentication
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    container_name: vectorhub-keycloak
+    command: start-dev --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME_STRICT: "false"
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./keycloak-realm.json:/opt/keycloak/data/import/realm.json:ro
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "bash", "-ec", "{ printf 'GET /realms/vectorhub HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3; grep -q '^HTTP/1\\.[01] 200 ' <&3; } 3<>/dev/tcp/127.0.0.1/8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - vectorhub-network
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: vectorhub-backend
+    environment:
+      DATABASE_URL: "sqlite:////data/vectorhub.db"
+      OIDC_ISSUER: http://keycloak:8080/realms/vectorhub
+      OIDC_EXTERNAL_ISSUER: http://localhost:8080/realms/vectorhub
+      OIDC_CLIENT_ID: vector-hub
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-changeme}
+      OIDC_REDIRECT_URI: http://localhost:5173/auth/callback
+      OIDC_AUDIENCE: vector-hub-api
+      DEMO_MODE: "${DEMO_MODE:-false}"
+      SECRET_KEY: ${SECRET_KEY:-changeme}
+      COOKIE_SECURE: "${COOKIE_SECURE:-false}"
+      GIT_WORKTREE_BASE: /tmp/vectorhub-worktrees
+    volumes:
+      - backend_data:/data
+      - vectorhub-worktrees:/tmp/vectorhub-worktrees
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://127.0.0.1:8000/health', timeout=5).raise_for_status()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - vectorhub-network
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: vectorhub-frontend
+    ports:
+      - "127.0.0.1:5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "-O", "/dev/null", "http://127.0.0.1:80/frontend-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - vectorhub-network
+
+volumes:
+  postgres_data:
+  backend_data:
+  vectorhub-worktrees:
+
+networks:
+  vectorhub-network:
+    driver: bridge
