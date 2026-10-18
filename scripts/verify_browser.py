@@ -35,7 +35,18 @@ with sync_playwright() as driver:
     page.wait_for_url(re.compile(r'http://localhost:8080/realms/vectorhub/.*'))
     page.locator('#username').fill('admin')
     page.locator('#password').fill('admin')
-    page.locator('#kc-login').click()
+    with page.expect_response(lambda response: response.url.split('?')[0] == BASE + '/auth/callback') as callback_response:
+        page.locator('#kc-login').click()
+    callback = callback_response.value
+    if callback.status != 303:
+        # Only the error detail is diagnostic; never print auth codes, cookies, or tokens.
+        try:
+            detail = str(callback.json().get('detail', 'No error detail'))
+        except (ValueError, AttributeError):
+            detail = 'Non-JSON authentication error'
+        detail = re.sub(r'[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}', '[REDACTED JWT]', detail)
+        detail = re.sub(r'(?i)(?:code|state|token|secret|password)=[^&\s]+', '[REDACTED]', detail)
+        raise AssertionError(f'OIDC callback rejected: HTTP {callback.status}; {detail[:200]}')
     page.wait_for_url(BASE + '/')
     session = context.request.get(API + '/auth/me')
     assert session.status == 200, f'Actual OIDC callback failed: {session.status}'
