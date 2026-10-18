@@ -51,9 +51,10 @@ class Settings(BaseSettings):
     # Session
     secret_key: str = Field(default="change-me-in-production", env="SECRET_KEY")
     session_cookie_name: str = "vectorhub_session"
-    
     # CSRF
     csrf_cookie_name: str = "vectorhub_csrf"
+    # Cookie security (secure=True requires HTTPS)
+    cookie_secure: bool = Field(default=False, env="COOKIE_SECURE")
 
     class Config:
         env_file = ".env"

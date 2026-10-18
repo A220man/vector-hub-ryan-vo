@@ -1,5 +1,43 @@
 # Status
 
+## Round 4: OIDC Session Cookie Secure Flag Repair — IN PROGRESS
+
+### Problem
+
+The hosted CI `compose-integration` job failed with a Playwright `TimeoutError` at `page.wait_for_url(BASE + '/')` (line 39 of `scripts/verify_browser.py`). After the Keycloak login callback redirected back to the frontend, the browser page never reached the `/` URL and the test timed out after 30 seconds.
+
+**Root cause:** The `set_auth_cookies` function in `backend/app/core/security.py` set `secure=not settings.debug`. With `DEBUG=false` (the compose default), `secure=True` was applied to the `vectorhub_session` and `vectorhub_csrf` cookies. Under HTTP (as in the Compose stack on GitHub CI runners), browsers silently drop `Secure` cookies — they are never sent back in subsequent requests. After the OIDC callback, the `ProtectedRoute` component called `api.auth.me()`, which received no session cookie, returned 401, and redirected to `/login`. The browser URL became `/login` instead of `/`, so `page.wait_for_url(BASE + '/')` never matched and timed out.
+
+### Changes Made
+
+**Backend (`backend/app/config.py`):**
+- Added `COOKIE_SECURE` setting (default `false`, env `COOKIE_SECURE`). Decouples cookie security from the `DEBUG` flag so HTTP deployments work correctly.
+
+**Backend (`backend/app/core/security.py`):**
+- Changed `set_auth_cookies` to use `settings.cookie_secure` instead of `not settings.debug` for both `vectorhub_session` and `vectorhub_csrf` cookies.
+
+**Backend (`backend/app/api/v1/auth.py`):**
+- Changed the login transaction cookie (`vectorhub_session_login`) to use `settings.cookie_secure` instead of `not settings.debug`.
+
+**Compose (`compose.yaml`):**
+- Added `COOKIE_SECURE: "${COOKIE_SECURE:-false}"` to backend environment.
+
+**Configuration (`.env.example`):**
+- Added `COOKIE_SECURE=false` with documentation.
+
+### Test Results
+
+```
+Backend: 52 passed
+Frontend: 21 passed
+Frontend build: ✓ (tsc + vite build)
+```
+
+### Remaining Limitations
+
+- Docker daemon not available in this sandbox; local Compose integration verification pending hosted CI.
+- Agent orchestration does not actually launch coding agent processes — only lifecycle state transitions.
+
 ## Round 3: Frontend Clone Workflow Repair — COMPLETE
 
 ### Problem

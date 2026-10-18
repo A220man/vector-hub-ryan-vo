@@ -60,7 +60,7 @@ async def login(request: Request, response: Response):
     store_pkce(state, verifier)
     transaction = create_session({"nonce": nonce, "state": state})
     response.set_cookie(settings.session_cookie_name + "_login", transaction,
-                        httponly=True, secure=not settings.debug,
+                        httponly=True, secure=settings.cookie_secure,
                         samesite="lax", max_age=600, path="/")
     return LoginResponse(auth_url=oidc_client.build_auth_url(state, nonce, challenge), state=state)
 

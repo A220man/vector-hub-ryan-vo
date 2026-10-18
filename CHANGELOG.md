@@ -2,7 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.3] - 2026-10-18
+## [1.0.4] - 2026-10-18
+
+### Fixed
+- **OIDC session cookie secure flag** — Added `COOKIE_SECURE` configuration setting (default `false`) to control the `Secure` attribute on HttpOnly session and CSRF cookies. Previously `secure=not debug` forced `Secure` cookies in non-debug mode, breaking the compose integration test and any HTTP deployment. The compose stack runs with `DEBUG=false` over HTTP; browsers silently drop `Secure` cookies over HTTP, causing the session to be lost after the OIDC callback redirect and the ProtectedRoute to redirect back to `/login`. Now `COOKIE_SECURE` defaults to `false` and can be set to `true` explicitly for HTTPS production deployments.
+- **Login transaction cookie** — Applied the same `cookie_secure` setting to the temporary PKCE login transaction cookie.
+
+### Tests
+- Backend: 52 passed (unchanged)
+- Frontend: 21 passed (unchanged)
+- Frontend build: ✓ (tsc + vite build)
 
 ### Fixed
 - **Frontend Docker healthcheck** — Fixed nginx IPv4 binding (`listen 0.0.0.0:80`) and added dedicated `/frontend-health` endpoint returning 200 'ok' for reliable health checks without backend dependency. Changed healthcheck from `wget --spider` (HEAD request) to `wget -O /dev/null` (GET request) for compatibility with nginx `try_files` directive.

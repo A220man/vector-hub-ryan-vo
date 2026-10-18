@@ -131,8 +131,8 @@ Key environment variables (see `.env.example`):
 | `LLM_API_KEY` | LLM provider API key | No (opt-in) |
 | `LLM_PROVIDER` | LLM provider (openai, anthropic, gemini, ollama) | No |
 | `SECRET_KEY` | Session signing key | Yes (prod) |
+| `COOKIE_SECURE` | Set Secure flag on cookies (true for HTTPS) | No (default: false) |
 | `GIT_WORKTREE_BASE` | Base directory for worktrees | No (default: /tmp/vectorhub-worktrees) |
-
 ## Keycloak Setup
 
 The compose.yaml includes Keycloak with a pre-configured realm (`vectorhub`) containing:

@@ -64,6 +64,7 @@ services:
       OIDC_AUDIENCE: vector-hub-api
       DEMO_MODE: "${DEMO_MODE:-false}"
       SECRET_KEY: ${SECRET_KEY:-changeme}
+      COOKIE_SECURE: "${COOKIE_SECURE:-false}"
       GIT_WORKTREE_BASE: /tmp/vectorhub-worktrees
     volumes:
       - backend_data:/data
