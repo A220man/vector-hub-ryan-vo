@@ -16,6 +16,7 @@
     "gemini",
     "ollama"
   ],
-  "summary": "Web-based agent orchestrator for managing fleets of coding agents (Claude Code, Codex, OpenCode) across isolated git worktrees with usage tracking.",
-  "version": "1.0.0"
+  "summary": "Work in progress: vector-hub-ryan-vo",
+  "version": "1.0.0",
+  "status": "work-in-progress"
 }
