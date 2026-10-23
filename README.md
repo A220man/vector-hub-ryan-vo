@@ -1,5 +1,8 @@
 # Vector Hub — Ryan Vo | AI & Machine Learning
 
+> Work in progress. This checkpoint may be incomplete or fail tests. See PLAN.md and STATUS.md before use.
+
+
 Current version: `1.0.0`.
 
 **Vector Hub | Ryan Vo | AI & Machine Learning**

@@ -43,11 +43,10 @@ class Settings(BaseSettings):
     
     # Git
     git_worktree_base: str = Field(default="/tmp/vectorhub-worktrees")
-    
+    # Shared directories to symlink into worktrees (e.g. node_modules, .cache)
+    git_shared_dirs: str = Field(default="node_modules,.cache,.yarn", env="GIT_SHARED_DIRS")
+
     # Host binding
-    host: str = "127.0.0.1"
-    port: int = 8000
-    
     # Session
     secret_key: str = Field(default="change-me-in-production", env="SECRET_KEY")
     session_cookie_name: str = "vectorhub_session"

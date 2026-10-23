@@ -4,7 +4,7 @@ import shutil
 import subprocess
 import asyncio
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 from pathlib import Path
 
 from app.config import settings
@@ -30,6 +30,18 @@ class GitService:
     def __init__(self, base_path: Optional[str] = None):
         self.base_path = Path(base_path or settings.git_worktree_base)
         self.base_path.mkdir(parents=True, exist_ok=True)
+        self.shared_dirs = [d.strip() for d in settings.git_shared_dirs.split(",") if d.strip()]
+
+    def _setup_shared_dirs(self, repo_path: Path, worktree_path: Path) -> None:
+        """Create symlinks for shared directories in the worktree."""
+        for shared_dir in self.shared_dirs:
+            source = repo_path / shared_dir
+            target = worktree_path / shared_dir
+            if source.exists() and source.is_dir() and not target.exists():
+                try:
+                    target.symlink_to(source, target_is_directory=True)
+                except (OSError, FileExistsError):
+                    pass  # Ignore symlink errors
 
     def clone_project(self, git_url: str, target_path: Path, base_ref: str = "main") -> GitOperationResult:
         """Clone a project at a specific ref."""
@@ -164,6 +176,11 @@ class GitService:
             exit_code=0
         )
 
+    async def create_worktree_async(self, repo_path: Path, branch: str, start_ref: str, worktree_name: str) -> GitOperationResult:
+        """Create a git worktree asynchronously (runs in thread pool)."""
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self.create_worktree, repo_path, branch, start_ref, worktree_name)
+
     def list_worktrees(self, repo_path: Path) -> list[dict]:
         """List worktrees for a repository."""
         proc = subprocess.run(
@@ -189,6 +206,11 @@ class GitService:
             worktrees.append(current)
 
         return worktrees
+
+    async def list_worktrees_async(self, repo_path: Path) -> list[dict]:
+        """List worktrees for a repository asynchronously."""
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self.list_worktrees, repo_path)
 
     def remove_worktree(self, repo_path: Path, worktree_path: Path) -> GitOperationResult:
         """Remove a git worktree."""
@@ -222,6 +244,11 @@ class GitService:
             shutil.rmtree(worktree_path, ignore_errors=True)
 
         return GitOperationResult(success=True)
+
+    async def remove_worktree_async(self, repo_path: Path, worktree_path: Path) -> GitOperationResult:
+        """Remove a git worktree asynchronously."""
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self.remove_worktree, repo_path, worktree_path)
 
     def prune_worktrees(self, repo_path: Path) -> GitOperationResult:
         """Run git worktree prune to clean up stale worktrees."""

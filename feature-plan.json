@@ -69,7 +69,7 @@
     {
       "id": "worktree-git-operations",
       "title": "Git Worktree Operations - Real git worktree create/list/remove",
-      "status": "planned",
+      "status": "in_progress",
       "acceptance": [
         "Backend service executes git worktree add/list/remove",
         "Worktree creation from branch/ref with background task",
@@ -77,8 +77,17 @@
         "Shared directories configuration (node_modules, .cache)",
         "Frontend worktree creation wizard with start-from picker"
       ],
-      "implementation": [],
-      "tests": []
+      "implementation": [
+        "backend/app/services/git_service.py",
+        "backend/app/api/v1/worktrees.py",
+        "backend/app/config.py",
+        "frontend/src/pages/CreateWorktreePage.tsx",
+        "frontend/src/pages/WorktreesPage.tsx"
+      ],
+      "tests": [
+        "backend/tests/test_worktrees_agents.py",
+        "frontend/src/project-navigation.test.tsx"
+      ]
     },
     {
       "id": "agent-orchestration",
