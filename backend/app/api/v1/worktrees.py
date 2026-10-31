@@ -80,19 +80,36 @@ async def create_worktree_for_project(
     db.commit()
     db.refresh(worktree)
 
-    # Check if we're in test mode (in-memory DB)
-    is_test_mode = db.bind.url.database == ":memory:" or "/test" in str(db.bind.url)
-
-    # Schedule git worktree creation as background task
-    background_tasks.add_task(
-        _create_worktree_background,
-        worktree_id=worktree.id,
-        repo_path=project.base_path,
-        branch=worktree_in.branch,
-        start_ref=worktree_in.start_ref,
-        worktree_name=worktree_in.name,
-        is_test_mode=is_test_mode,
+    # Check if we're in test mode (in-memory DB or test database file)
+    db_url = str(db.bind.url)
+    is_test_mode = (
+        db.bind.url.database == ":memory:" 
+        or "/test" in db_url
+        or "vectorhub-test-" in db_url
     )
+
+    if is_test_mode:
+        # Run synchronously in tests so the worktree is ready before response
+        await _create_worktree_background(
+            worktree_id=worktree.id,
+            repo_path=project.base_path,
+            branch=worktree_in.branch,
+            start_ref=worktree_in.start_ref,
+            worktree_name=worktree_in.name,
+            is_test_mode=True,
+        )
+        db.refresh(worktree)
+    else:
+        # Schedule git worktree creation as background task
+        background_tasks.add_task(
+            _create_worktree_background,
+            worktree_id=worktree.id,
+            repo_path=project.base_path,
+            branch=worktree_in.branch,
+            start_ref=worktree_in.start_ref,
+            worktree_name=worktree_in.name,
+            is_test_mode=False,
+        )
 
     return worktree
 
@@ -181,8 +198,13 @@ async def delete_worktree(
     if not worktree:
         raise HTTPException(status_code=404, detail="Worktree not found")
 
-    # Check if we're in test mode (in-memory DB)
-    is_test_mode = db.bind.url.database == ":memory:" or "/test" in str(db.bind.url)
+    # Check if we're in test mode (in-memory DB or test database file)
+    db_url = str(db.bind.url)
+    is_test_mode = (
+        db.bind.url.database == ":memory:" 
+        or "/test" in db_url
+        or "vectorhub-test-" in db_url
+    )
 
     if worktree.path and worktree.project and worktree.project.base_path:
         # Schedule git worktree removal as background task
