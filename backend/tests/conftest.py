@@ -13,7 +13,9 @@ from sqlalchemy.pool import StaticPool
 
 # Set test env vars before importing app
 os.environ["DEMO_MODE"] = "true"
-os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+import tempfile
+test_db_path = tempfile.mktemp(suffix=".db", prefix="vectorhub-test-")
+os.environ["DATABASE_URL"] = f"sqlite:///{test_db_path}"
 os.environ["OIDC_CLIENT_SECRET"] = "test-secret"
 os.environ["SECRET_KEY"] = "test-secret-key-for-testing"
 
@@ -24,14 +26,22 @@ from app.main import create_app
 @pytest.fixture(scope="session")
 def test_engine():
     """Create test database engine."""
+    # Use the same database URL as the app (set via env var)
+    import os
+    db_url = os.environ["DATABASE_URL"]
     engine = create_engine(
-        "sqlite:///:memory:",
+        db_url,
         connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
     )
     Base.metadata.create_all(bind=engine)
     yield engine
     Base.metadata.drop_all(bind=engine)
+    # Clean up test database file
+    if db_url.startswith("sqlite:///") and db_url != "sqlite:///:memory:":
+        import os
+        db_path = db_url.replace("sqlite:///", "")
+        if os.path.exists(db_path):
+            os.unlink(db_path)
 
 
 @pytest.fixture(scope="session")

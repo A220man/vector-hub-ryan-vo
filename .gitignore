@@ -40,3 +40,4 @@ Thumbs.db
 
 # Local Python environment created during verification
 /backend/venv/
+venv/

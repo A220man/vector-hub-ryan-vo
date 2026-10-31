@@ -1,8 +1,21 @@
 # Changelog
 
+## 1.2.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
 ## 1.1.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
+
+### Fixed
+- **Background task test failure** — Fixed `test_full_workflow_create_clone_worktree` failure caused by SQLite in-memory database isolation. The background task creating git worktrees ran in a separate thread with its own database connection, which couldn't see tables created by the test session.
+- **Test database isolation** — Changed test configuration to use file-based SQLite database (`sqlite:///tmp/vectorhub-test-*.db`) instead of in-memory (`sqlite:///:memory:`), allowing multiple connections to share the same database state.
+- **Synchronous background execution in tests** — Modified `create_worktree_for_project` endpoint to run the background task synchronously and refresh the worktree object before returning the response in test mode, ensuring the API returns the final worktree status.
+
+### Tests
+- Backend: 53 passed (+1 from previous checkpoint)
+- Frontend: 21 passed (unchanged)
 
 All notable changes to this project will be documented in this file.
 
