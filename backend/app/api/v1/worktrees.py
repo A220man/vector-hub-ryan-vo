@@ -42,6 +42,23 @@ async def list_worktrees(
     worktrees = query.offset(skip).limit(limit).all()
     return worktrees
 
+@router.get("/{project_id}/refs", response_model=list[str])
+async def list_project_refs(
+    project_id: str,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("viewer")),
+):
+    """List available git refs (branches and tags) for a project."""
+    project = db.get(Project, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    if not project.base_path:
+        raise HTTPException(status_code=400, detail="Project has no base path. Project must be cloned first.")
+    
+    refs = await git_service.list_refs_async(Path(project.base_path))
+    return refs
+
 
 @router.post("/{project_id}", response_model=WorktreeRead, status_code=status.HTTP_201_CREATED)
 async def create_worktree_for_project(

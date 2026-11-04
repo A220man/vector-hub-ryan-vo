@@ -1,8 +1,24 @@
 # Changelog
 
+## 1.3.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
 ## 1.2.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
+
+### Added
+- **Start-from picker for worktree creation** — Worktree creation wizard now includes a dropdown for "Start Ref" populated with available git branches and tags from the repository.
+  - Backend: Added `GitService.list_refs()` method to fetch local branches, remote branches, and tags (sorted with main/master first)
+  - Backend: Added `GET /api/v1/worktrees/{project_id}/refs` endpoint returning array of ref names
+  - Frontend: Updated `CreateWorktreePage` and `WorktreesPage` modal to use dropdown picker with loading state
+  - Frontend: Added `api.worktrees.listRefs(projectId)` to typed API client
+- **worktree-git-operations feature complete** — All acceptance criteria met: git worktree add/list/remove, background creation, status tracking, shared directories, and start-from picker.
+
+### Tests
+- Backend: 53 passed (all tests passing)
+- Frontend: 21 passed (all tests passing)
 
 ## 1.1.0 — work-in-progress checkpoint
 

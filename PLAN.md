@@ -32,7 +32,7 @@ Tests: `backend/tests/test_projects.py`, `backend/tests/test_auth.py`, `backend/
 
 ### worktree-git-operations — Git Worktree Operations - Real git worktree create/list/remove
 
-Status: in_progress
+Status: done
 
 Acceptance:
 - Backend service executes git worktree add/list/remove
@@ -41,7 +41,7 @@ Acceptance:
 - Shared directories configuration (node_modules, .cache)
 - Frontend worktree creation wizard with start-from picker
 
-Implementation: `backend/app/services/git_service.py`, `backend/app/api/v1/worktrees.py`, `backend/app/config.py`, `frontend/src/pages/CreateWorktreePage.tsx`, `frontend/src/pages/WorktreesPage.tsx`
+Implementation: `backend/app/services/git_service.py`, `backend/app/api/v1/worktrees.py`, `backend/app/config.py`, `frontend/src/pages/CreateWorktreePage.tsx`, `frontend/src/api/client.ts`
 
 Tests: `backend/tests/test_worktrees_agents.py`, `frontend/src/project-navigation.test.tsx`
 
