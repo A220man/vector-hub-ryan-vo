@@ -13,10 +13,20 @@ export function CreateWorktreePage() {
   const [selectedProject, setSelectedProject] = useState<string>(projectIdFromUrl || '')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [refs, setRefs] = useState<string[]>([])
+  const [loadingRefs, setLoadingRefs] = useState(false)
 
   useEffect(() => {
     loadProjects()
   }, [])
+
+  useEffect(() => {
+    if (selectedProject) {
+      loadRefs()
+    } else {
+      setRefs([])
+    }
+  }, [selectedProject])
 
   async function loadProjects() {
     try {
@@ -29,6 +39,23 @@ export function CreateWorktreePage() {
       setError('Failed to load projects')
     } finally {
       setLoadingProjects(false)
+    }
+  }
+
+  async function loadRefs() {
+    setLoadingRefs(true)
+    try {
+      const data = await api.worktrees.listRefs(selectedProject)
+      setRefs(data)
+      // Set default start_ref to first ref (main/master) if available
+      if (data.length > 0 && formData.start_ref === 'main') {
+        setFormData(prev => ({ ...prev, start_ref: data[0] }))
+      }
+    } catch (err) {
+      console.error('Failed to load refs:', err)
+      setRefs(['main']) // fallback
+    } finally {
+      setLoadingRefs(false)
     }
   }
 
@@ -120,12 +147,33 @@ export function CreateWorktreePage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Ref</label>
-            <input
-              type="text"
-              value={formData.start_ref}
-              onChange={e => setFormData({ ...formData, start_ref: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-            />
+            {loadingRefs ? (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={formData.start_ref}
+                  onChange={e => setFormData({ ...formData, start_ref: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  disabled
+                />
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+              </div>
+            ) : (
+              <select
+                value={formData.start_ref}
+                onChange={e => setFormData({ ...formData, start_ref: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                required
+              >
+                {refs.map(ref => (
+                  <option key={ref} value={ref}>{ref}</option>
+                ))}
+                {refs.length === 0 && <option value="main">main</option>}
+              </select>
+            )}
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Select the branch/tag to create the worktree from
+            </p>
           </div>
           <div className="flex justify-end space-x-3 pt-4">
             <button

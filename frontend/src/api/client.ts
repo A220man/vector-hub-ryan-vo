@@ -91,6 +91,8 @@ export const api = {
       diff: string
       start_ref: string
     }>(`${API_BASE}/worktrees/${id}/diff`),
+    listRefs: (projectId: string) =>
+      fetchJson<string[]>(`${API_BASE}/worktrees/${projectId}/refs`),
   },
 
   // Agent Runs

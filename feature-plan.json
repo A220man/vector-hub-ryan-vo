@@ -69,7 +69,7 @@
     {
       "id": "worktree-git-operations",
       "title": "Git Worktree Operations - Real git worktree create/list/remove",
-      "status": "in_progress",
+      "status": "done",
       "acceptance": [
         "Backend service executes git worktree add/list/remove",
         "Worktree creation from branch/ref with background task",
@@ -82,7 +82,7 @@
         "backend/app/api/v1/worktrees.py",
         "backend/app/config.py",
         "frontend/src/pages/CreateWorktreePage.tsx",
-        "frontend/src/pages/WorktreesPage.tsx"
+        "frontend/src/api/client.ts"
       ],
       "tests": [
         "backend/tests/test_worktrees_agents.py",

@@ -273,4 +273,58 @@ class GitService:
         )
         if proc.returncode == 0:
             return proc.stdout.strip()
-        return None
+
+    def list_refs(self, repo_path: Path) -> list[str]:
+        """List available git refs (branches and tags) for a repository."""
+        refs = []
+        
+        # Get local branches
+        proc = subprocess.run(
+            ["git", "branch", "--format=%(refname:short)"],
+            capture_output=True, text=True, timeout=10,
+            cwd=str(repo_path)
+        )
+        if proc.returncode == 0:
+            for line in proc.stdout.strip().split("\n"):
+                line = line.strip()
+                if line and not line.startswith("*"):
+                    refs.append(line)
+        
+        # Get remote branches (prefixed with origin/)
+        proc = subprocess.run(
+            ["git", "branch", "-r", "--format=%(refname:short)"],
+            capture_output=True, text=True, timeout=10,
+            cwd=str(repo_path)
+        )
+        if proc.returncode == 0:
+            for line in proc.stdout.strip().split("\n"):
+                line = line.strip()
+                if line and not line.startswith("origin/HEAD"):
+                    refs.append(line)
+        
+        # Get tags
+        proc = subprocess.run(
+            ["git", "tag", "--sort=-v:refname"],
+            capture_output=True, text=True, timeout=10,
+            cwd=str(repo_path)
+        )
+        if proc.returncode == 0:
+            for line in proc.stdout.strip().split("\n"):
+                line = line.strip()
+                if line:
+                    refs.append(line)
+        
+        # Deduplicate and sort (main/master first, then alphabetical)
+        refs = list(set(refs))
+        priority = {"main": 0, "master": 0}
+        refs.sort(key=lambda r: (priority.get(r, 1), r))
+        
+        return refs
+
+
+    async def list_refs_async(self, repo_path: Path) -> list[str]:
+        """List available git refs asynchronously."""
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self.list_refs, repo_path)
+
+
