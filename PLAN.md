@@ -4,7 +4,7 @@ Each round completes one feature or repair. Future items are planned, not implem
 
 ## Current round
 
-project-foundation
+datetime-fix
 
 ## Roadmap
 
@@ -26,9 +26,9 @@ Acceptance:
 - Dockerfiles and compose.yaml with Keycloak
 - OIDC authentication with PKCE and demo mode
 
-Implementation: `backend/app/main.py`, `backend/app/config.py`, `backend/app/core/db.py`, `backend/app/core/security.py`, `backend/app/services/git_service.py`, `backend/app/models/project.py`, `backend/app/models/worktree.py`, `backend/app/models/agent_run.py`, `backend/app/schemas/project.py`, `backend/app/schemas/worktree.py`, `backend/app/schemas/agent_run.py`, `backend/app/api/v1/projects.py`, `backend/app/api/v1/worktrees.py`, `backend/app/api/v1/agents.py`, `backend/app/api/v1/auth.py`, `frontend/src/App.tsx`, `frontend/src/api/client.ts`, `frontend/src/context/AuthContext.tsx`, `frontend/src/components/Layout.tsx`, `frontend/src/components/StatusBadge.tsx`, `frontend/src/pages/Dashboard.tsx`, `frontend/src/pages/ProjectsPage.tsx`, `frontend/src/pages/CreateProjectPage.tsx`, `frontend/src/pages/ProjectDetailPage.tsx`, `frontend/src/pages/WorktreesPage.tsx`, `frontend/src/pages/CreateWorktreePage.tsx`, `frontend/src/pages/WorktreeDetailPage.tsx`, `frontend/src/pages/AgentRunsPage.tsx`, `frontend/src/pages/CreateAgentRunPage.tsx`, `frontend/src/pages/AgentRunDetailPage.tsx`, `frontend/src/types.ts`
+Implementation: `backend/app/main.py`, `backend/app/config.py`, `backend/app/core/db.py`, `backend/app/core/security.py`, `backend/app/services/git_service.py`, `backend/app/models/project.py`, `backend/app/models/worktree.py`, `backend/app/models/agent_run.py`, `backend/app/schemas/project.py`, `backend/app/schemas/worktree.py`, `backend/app/schemas/agent_run.py`, `backend/app/api/v1/projects.py`, `backend/app/api/v1/worktrees.py`, `backend/app/api/v1/agents.py`, `backend/app/api/v1/auth.py`, `frontend/src/App.tsx`, `frontend/src/api/client.ts`, `frontend/src/context/AuthContext.tsx`, `frontend/src/components/Layout.tsx`, `frontend/src/components/StatusBadge.tsx`, `frontend/src/pages/Dashboard.tsx`, `frontend/src/pages/ProjectsPage.tsx`, `frontend/src/pages/CreateProjectPage.tsx`, `frontend/src/pages/CreateWorktreePage.tsx`, `frontend/src/pages/WorktreesPage.tsx`, `frontend/src/pages/WorktreeDetailPage.tsx`, `frontend/src/pages/AgentRunsPage.tsx`, `frontend/src/pages/CreateAgentRunPage.tsx`, `frontend/src/pages/AgentRunDetailPage.tsx`
 
-Tests: `backend/tests/test_projects.py`, `backend/tests/test_auth.py`, `backend/tests/test_worktrees_agents.py`, `backend/tests/test_oidc_boundary.py`, `backend/tests/test_public_issuer.py`, `frontend/src/App.test.tsx`, `frontend/src/api/client.test.ts`, `frontend/src/api/client-boundary.test.ts`, `frontend/src/context/login-boundary.test.tsx`, `frontend/src/project-navigation.test.tsx`
+Tests: `backend/tests/test_projects.py`, `backend/tests/test_auth.py`, `backend/tests/test_worktrees_agents.py`, `backend/tests/test_oidc_boundary.py`, `backend/tests/test_public_issuer.py`, `backend/tests/test_clone_lifecycle.py`, `frontend/src/App.test.tsx`, `frontend/src/api/client.test.ts`, `frontend/src/api/client-boundary.test.ts`, `frontend/src/context/login-boundary.test.tsx`, `frontend/src/project-navigation.test.tsx`, `frontend/src/project-preparation.test.tsx`, `frontend/src/agent-workflow.test.tsx`, `frontend/src/concurrent-preparation.test.tsx`
 
 ### worktree-git-operations — Git Worktree Operations - Real git worktree create/list/remove
 
@@ -44,6 +44,17 @@ Acceptance:
 Implementation: `backend/app/services/git_service.py`, `backend/app/api/v1/worktrees.py`, `backend/app/config.py`, `frontend/src/pages/CreateWorktreePage.tsx`, `frontend/src/api/client.ts`
 
 Tests: `backend/tests/test_worktrees_agents.py`, `frontend/src/project-navigation.test.tsx`
+
+### datetime-fix — Fix datetime.utcnow() deprecation warnings
+
+Status: done
+
+Acceptance:
+- Replace datetime.utcnow() with datetime.now(timezone.utc) in projects.py and agents.py APIs
+
+Implementation: `backend/app/api/v1/projects.py`, `backend/app/api/v1/agents.py`
+
+Tests: `backend/tests/test_projects.py`, `backend/tests/test_worktrees_agents.py`
 
 ### agent-orchestration — Agent Orchestration - Run coding agents in worktrees
 

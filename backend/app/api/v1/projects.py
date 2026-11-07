@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Optional
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from tempfile import TemporaryDirectory
 
 from app.core.db import get_db
@@ -107,7 +107,7 @@ def clone_project(
         project.error_message = str(exc)[:2000] or "Git clone failed"
         project.base_path = None
 
-    project.updated_at = datetime.utcnow()
+    project.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(project)
     return project
@@ -146,7 +146,7 @@ async def update_project(
     for field, value in update_data.items():
         setattr(project, field, value)
 
-    project.updated_at = datetime.utcnow()
+    project.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(project)
     return project
@@ -171,7 +171,7 @@ async def delete_project(
         raise HTTPException(status_code=409, detail="Project clone is in progress")
 
     project.status = ProjectStatus.archived
-    project.updated_at = datetime.utcnow()
+    project.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(project)
     return project

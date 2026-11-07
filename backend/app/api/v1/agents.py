@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.core.db import get_db
 from app.core.security import require_role, verify_csrf
@@ -116,7 +116,7 @@ async def start_agent_run(
         )
 
     run.status = AgentRunStatus.running
-    run.started_at = datetime.utcnow()
+    run.started_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(run)
     return run
@@ -141,7 +141,7 @@ async def stop_agent_run(
         )
 
     run.status = AgentRunStatus.stopped
-    run.finished_at = datetime.utcnow()
+    run.finished_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(run)
     return run
@@ -166,7 +166,7 @@ async def complete_agent_run(
         )
 
     run.status = AgentRunStatus.completed
-    run.finished_at = datetime.utcnow()
+    run.finished_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(run)
     return run
