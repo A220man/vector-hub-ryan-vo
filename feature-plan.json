@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_feature": "project-foundation",
+  "current_feature": "datetime-fix",
   "features": [
     {
       "id": "project-foundation",
@@ -44,14 +44,12 @@
         "frontend/src/pages/Dashboard.tsx",
         "frontend/src/pages/ProjectsPage.tsx",
         "frontend/src/pages/CreateProjectPage.tsx",
-        "frontend/src/pages/ProjectDetailPage.tsx",
-        "frontend/src/pages/WorktreesPage.tsx",
         "frontend/src/pages/CreateWorktreePage.tsx",
+        "frontend/src/pages/WorktreesPage.tsx",
         "frontend/src/pages/WorktreeDetailPage.tsx",
         "frontend/src/pages/AgentRunsPage.tsx",
         "frontend/src/pages/CreateAgentRunPage.tsx",
-        "frontend/src/pages/AgentRunDetailPage.tsx",
-        "frontend/src/types.ts"
+        "frontend/src/pages/AgentRunDetailPage.tsx"
       ],
       "tests": [
         "backend/tests/test_projects.py",
@@ -59,11 +57,15 @@
         "backend/tests/test_worktrees_agents.py",
         "backend/tests/test_oidc_boundary.py",
         "backend/tests/test_public_issuer.py",
+        "backend/tests/test_clone_lifecycle.py",
         "frontend/src/App.test.tsx",
         "frontend/src/api/client.test.ts",
         "frontend/src/api/client-boundary.test.ts",
         "frontend/src/context/login-boundary.test.tsx",
-        "frontend/src/project-navigation.test.tsx"
+        "frontend/src/project-navigation.test.tsx",
+        "frontend/src/project-preparation.test.tsx",
+        "frontend/src/agent-workflow.test.tsx",
+        "frontend/src/concurrent-preparation.test.tsx"
       ]
     },
     {
@@ -87,6 +89,22 @@
       "tests": [
         "backend/tests/test_worktrees_agents.py",
         "frontend/src/project-navigation.test.tsx"
+      ]
+    },
+    {
+      "id": "datetime-fix",
+      "title": "Fix datetime.utcnow() deprecation warnings",
+      "status": "done",
+      "acceptance": [
+        "Replace datetime.utcnow() with datetime.now(timezone.utc) in projects.py and agents.py APIs"
+      ],
+      "implementation": [
+        "backend/app/api/v1/projects.py",
+        "backend/app/api/v1/agents.py"
+      ],
+      "tests": [
+        "backend/tests/test_projects.py",
+        "backend/tests/test_worktrees_agents.py"
       ]
     },
     {
