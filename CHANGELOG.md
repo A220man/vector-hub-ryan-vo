@@ -1,8 +1,18 @@
 # Changelog
 
-## 1.4.0 — work-in-progress checkpoint
+## 1.5.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
+
+## 1.4.0 — work-in-progress checkpoint
+
+### Fixed
+- **datetime.utcnow() deprecation warnings** — Replaced all `datetime.utcnow()` calls with `datetime.now(timezone.utc)` for timezone-aware datetime handling across the codebase.
+  - API layer: `backend/app/api/v1/projects.py`, `backend/app/api/v1/agents.py`
+  - SQLAlchemy models: `backend/app/models/project.py`, `backend/app/models/worktree.py`, `backend/app/models/agent_run.py` (column defaults and onupdate handlers)
+- All 53 backend tests and 21 frontend tests pass.
+
+
 
 ## 1.3.0 — work-in-progress checkpoint
 

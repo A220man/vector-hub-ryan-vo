@@ -51,8 +51,9 @@ Status: done
 
 Acceptance:
 - Replace datetime.utcnow() with datetime.now(timezone.utc) in projects.py and agents.py APIs
+- Replace datetime.utcnow() column defaults in Project, Worktree, and AgentRun models
 
-Implementation: `backend/app/api/v1/projects.py`, `backend/app/api/v1/agents.py`
+Implementation: `backend/app/api/v1/projects.py`, `backend/app/api/v1/agents.py`, `backend/app/models/project.py`, `backend/app/models/worktree.py`, `backend/app/models/agent_run.py`
 
 Tests: `backend/tests/test_projects.py`, `backend/tests/test_worktrees_agents.py`
 

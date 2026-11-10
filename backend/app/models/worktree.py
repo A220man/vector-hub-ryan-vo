@@ -1,6 +1,6 @@
 """Worktree model."""
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, String, Text, DateTime, Enum, ForeignKey, JSON
 from sqlalchemy.orm import relationship
@@ -30,8 +30,8 @@ class Worktree(Base):
     status: WorktreeStatus = Column(Enum(WorktreeStatus), nullable=False, default=WorktreeStatus.creating)
     error_message: str = Column(Text, nullable=True)
 
-    created_at: datetime = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
-    updated_at: datetime = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: datetime = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     project = relationship("Project", back_populates="worktrees")
     agent_runs = relationship("AgentRun", back_populates="worktree", cascade="all, delete-orphan")

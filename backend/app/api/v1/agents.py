@@ -91,7 +91,7 @@ async def update_agent_run(
     for field, value in update_data.items():
         setattr(run, field, value)
 
-    run.updated_at = datetime.utcnow()
+    run.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(run)
     return run
