@@ -1,6 +1,6 @@
 """AgentRun model."""
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, String, Text, DateTime, Enum, ForeignKey, JSON, Integer
 from sqlalchemy.orm import relationship
@@ -36,8 +36,8 @@ class AgentRun(Base):
     output_tokens: int = Column(Integer, nullable=True)
     cost_cents: int = Column(Integer, nullable=True)
 
-    created_at: datetime = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
-    updated_at: datetime = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: datetime = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     worktree = relationship("Worktree", back_populates="agent_runs")
 

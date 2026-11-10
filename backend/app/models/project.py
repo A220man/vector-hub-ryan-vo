@@ -1,6 +1,6 @@
 """Project model."""
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, String, Text, DateTime, Enum
 from sqlalchemy.orm import relationship
@@ -36,8 +36,8 @@ class Project(Base):
     status: ProjectStatus = Column(Enum(ProjectStatus), nullable=False, default=ProjectStatus.pending)
     error_message: str = Column(Text, nullable=True)
 
-    created_at: datetime = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
-    updated_at: datetime = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: datetime = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     worktrees = relationship("Worktree", back_populates="project", cascade="all, delete-orphan")
 

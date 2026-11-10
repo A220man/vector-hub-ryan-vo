@@ -96,11 +96,15 @@
       "title": "Fix datetime.utcnow() deprecation warnings",
       "status": "done",
       "acceptance": [
-        "Replace datetime.utcnow() with datetime.now(timezone.utc) in projects.py and agents.py APIs"
+        "Replace datetime.utcnow() with datetime.now(timezone.utc) in projects.py and agents.py APIs",
+        "Replace datetime.utcnow() column defaults in Project, Worktree, and AgentRun models"
       ],
       "implementation": [
         "backend/app/api/v1/projects.py",
-        "backend/app/api/v1/agents.py"
+        "backend/app/api/v1/agents.py",
+        "backend/app/models/project.py",
+        "backend/app/models/worktree.py",
+        "backend/app/models/agent_run.py"
       ],
       "tests": [
         "backend/tests/test_projects.py",
