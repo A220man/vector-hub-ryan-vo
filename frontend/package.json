@@ -6,7 +6,7 @@
     "email": "ryandtvo@gmail.com",
     "url": "https://github.com/A220man"
   },
-  "version": "1.0.0",
+  "version": "1.6.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
