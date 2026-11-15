@@ -114,7 +114,7 @@
     {
       "id": "agent-orchestration",
       "title": "Agent Orchestration - Run coding agents in worktrees",
-      "status": "planned",
+      "status": "in_progress",
       "acceptance": [
         "Agent configuration (Claude Code, Codex, OpenCode, custom)",
         "Start agent process in worktree with PTY",
@@ -122,8 +122,14 @@
         "Send input to agent terminal",
         "Agent run history with logs"
       ],
-      "implementation": [],
-      "tests": []
+      "implementation": [
+        "backend/app/services/agent_service.py",
+        "backend/app/api/v1/agents.py"
+      ],
+      "tests": [
+        "backend/tests/test_agent_service.py",
+        "backend/tests/test_worktrees_agents.py"
+      ]
     },
     {
       "id": "usage-tracking",
