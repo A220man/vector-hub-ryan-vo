@@ -4,6 +4,15 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime, timezone
 
+import os
+import pty
+import select
+import asyncio
+from pathlib import Path
+
+from app.config import settings
+from app.services.git_service import GitService
+
 from app.core.db import get_db
 from app.core.security import require_role, verify_csrf
 from app.models.worktree import Worktree, WorktreeStatus
