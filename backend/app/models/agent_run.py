@@ -35,6 +35,7 @@ class AgentRun(Base):
     input_tokens: int = Column(Integer, nullable=True)
     output_tokens: int = Column(Integer, nullable=True)
     cost_cents: int = Column(Integer, nullable=True)
+    process_id: str = Column(String(64), nullable=True, index=True)
 
     created_at: datetime = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

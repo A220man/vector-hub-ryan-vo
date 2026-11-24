@@ -3,7 +3,7 @@
 > Work in progress. This checkpoint may be incomplete or fail tests. See PLAN.md and STATUS.md before use.
 
 
-Current version: `1.7.0`.
+Current version: `1.8.0`.
 
 **Vector Hub | Ryan Vo | AI & Machine Learning**
 
