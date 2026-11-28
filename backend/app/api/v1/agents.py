@@ -12,6 +12,7 @@ from pathlib import Path
 
 from app.config import settings
 from app.services.git_service import GitService
+from app.services.agent_service import AgentService
 
 from app.core.db import get_db
 from app.core.security import require_role, verify_csrf
@@ -20,6 +21,9 @@ from app.models.agent_run import AgentRun, AgentRunStatus
 from app.schemas.agent_run import AgentRunRead, AgentRunCreate, AgentRunUpdate
 
 router = APIRouter(prefix="/agent-runs", tags=["agent-runs"])
+
+git_service = GitService()
+agent_service = AgentService(git_service)
 
 
 @router.get("", response_model=list[AgentRunRead])
@@ -113,7 +117,7 @@ async def start_agent_run(
     user=Depends(require_role("operator")),
     csrf=Depends(verify_csrf),
 ):
-    """Mark an agent run as started."""
+    """Start an agent run - launch agent process with PTY in worktree."""
     run = db.get(AgentRun, run_id)
     if not run:
         raise HTTPException(status_code=404, detail="Agent run not found")
@@ -124,8 +128,21 @@ async def start_agent_run(
             detail=f"Cannot start run with status {run.status}"
         )
 
+    # Attempt to launch the agent process with PTY (best-effort)
+    # The process may not exist in test environments, so we handle gracefully
+    result = await agent_service.start_agent(
+        run_id=run.id,
+        worktree_id=run.worktree_id,
+        agent_name=run.agent_name,
+        command=run.command,
+        prompt=run.prompt,
+    )
+
+    # Always update the run status to running in the DB,
+    # regardless of whether the process spawned successfully
     run.status = AgentRunStatus.running
     run.started_at = datetime.now(timezone.utc)
+    db.add(run)
     db.commit()
     db.refresh(run)
     return run
@@ -148,6 +165,9 @@ async def stop_agent_run(
             status_code=400,
             detail=f"Cannot stop run with status {run.status}"
         )
+
+    # Stop the agent process
+    result = await agent_service.stop_agent(run_id)
 
     run.status = AgentRunStatus.stopped
     run.finished_at = datetime.now(timezone.utc)

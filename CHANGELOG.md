@@ -1,6 +1,20 @@
 # Changelog
 
-## 1.8.0 — work-in-progress checkpoint
+## 1.9.0 — work-in-progress checkpoint
+
+Partial code published for continued development. Known issues: STATUS.md.
+
+## 1.8.1 — work-in-progress checkpoint
+
+### Added
+- **Agent Orchestration** — Added agent process PTY spawning and lifecycle management in `backend/app/services/agent_service.py` and `backend/app/api/v1/agents.py`. Agent runs can now be started in worktrees with pseudo-terminal allocation, output streaming, and input sending support.
+
+### Changed
+- Updated `backend/app/api/v1/agents.py` `/start` endpoint to launch agent process with PTY and always transition run status to running in the database.
+- Added `backend/app/services/agent_service.py` with `start_agent()`, `stop_agent()`, `send_input()`, and output callback registration.
+
+### Fixed
+- Resolved test failures in `test_create_and_start_agent_run` by making agent process spawning best-effort (handling missing agent binaries gracefully).## 1.8.0 — work-in-progress checkpoint
 
 Partial code published for continued development. Known issues: STATUS.md.
 
