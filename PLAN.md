@@ -59,7 +59,7 @@ Tests: `backend/tests/test_projects.py`, `backend/tests/test_worktrees_agents.py
 
 ### agent-orchestration — Agent Orchestration - Run coding agents in worktrees
 
-Status: planned
+Status: in_progress
 
 Acceptance:
 - Agent configuration (Claude Code, Codex, OpenCode, custom)
@@ -67,6 +67,10 @@ Acceptance:
 - Stream agent output via WebSocket to frontend
 - Send input to agent terminal
 - Agent run history with logs
+
+Implementation: `backend/app/services/agent_service.py`, `backend/app/api/v1/agents.py`
+
+Tests: `backend/tests/test_worktrees_agents.py::TestAgentRunAPI`
 
 ### usage-tracking — Usage Tracking - Monitor agent API usage and costs
 
